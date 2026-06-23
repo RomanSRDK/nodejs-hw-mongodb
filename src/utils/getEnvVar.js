@@ -1,11 +1,15 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({
+  quiet: true,
+});
 
 export function getEnvVar(name, defaultValue) {
-  const value = process.env[name];
-  if (value) return value;
+  const value = process.env[name] ?? defaultValue;
 
-  if (defaultValue) return defaultValue;
-  throw new Error(`Missing: process.env['${name}'].`);
+  if (value === undefined) {
+    throw new Error(`Missing: process.env['${name}'].`);
+  }
+
+  return value;
 }

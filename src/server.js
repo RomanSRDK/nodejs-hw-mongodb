@@ -1,11 +1,11 @@
-import { getEnvVar } from './utils/getEnvVar';
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
+import { getEnvVar } from './utils/getEnvVar.js';
 
 const PORT = Number(getEnvVar('PORT', '3000'));
 
-export const startServer = () => {
+export const setupServer = () => {
   const app = express();
 
   //MIDDLEWARE
@@ -28,7 +28,7 @@ export const startServer = () => {
   });
 
   //MIDDLEWARE
-  app.use('*', (req, res, next) => {
+  app.use((req, res) => {
     res.status(404).json({
       message: 'Not found',
     });
@@ -42,5 +42,8 @@ export const startServer = () => {
   });
   //MIDDLEWARE
 
-  app.listen(PORT);
+  // const PORT = process.env.PORT ?? 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 };
