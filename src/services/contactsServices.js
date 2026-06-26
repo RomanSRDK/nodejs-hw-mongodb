@@ -22,4 +22,21 @@ const deleteContact = async (contactId) => {
   return contact;
 };
 
-export { getAllContacts, getContactById, createContact, deleteContact };
+const updateContact = async (contactId, payload, options = {}) => {
+  const contact = await ContactsCollection.findOneAndUpdate(
+    { _id: contactId },
+    payload,
+    {
+      new: true,
+    },
+  );
+  return contact;
+};
+
+export {
+  getAllContacts,
+  getContactById,
+  createContact,
+  deleteContact,
+  updateContact,
+};
