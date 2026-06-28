@@ -23,6 +23,7 @@ const getContactsController = async (req, res, next) => {
 
 const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
+
   const contact = await getContactById(contactId);
 
   if (!contact) {
