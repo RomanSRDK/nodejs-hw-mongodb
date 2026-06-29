@@ -1,15 +1,19 @@
 import { ContactsCollection } from '../models/contactSchema.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-const getAllContacts = async ({ page, perPage }) => {
-  const limit = perPage;
+const getAllContacts = async ({ page, perPage, sortBy, sortOrder }) => {
   const skip = (page - 1) * perPage;
-  const contactsQuery = ContactsCollection.find();
-  const contactsCount = await ContactsCollection.find()
-    .merge(contactsQuery)
-    .countDocuments();
-  const contacts = await contactsQuery.skip(skip).limit(limit).exec();
-  const paginationData = calculatePaginationData(contactsCount, perPage, page);
+  const limit = perPage;
+
+  const totalContacts = await ContactsCollection.countDocuments();
+
+  const contacts = await ContactsCollection.find()
+    .skip(skip)
+    .limit(limit)
+    .sort({ [sortBy]: sortOrder });
+
+  const paginationData = calculatePaginationData(totalContacts, page, perPage);
+
   return {
     data: contacts,
     ...paginationData,

@@ -1,6 +1,4 @@
-export const parsePaginationParams = (query) => {
-  const { page, perPage } = query;
-
+export const parsePaginationParams = ({ page, perPage }) => {
   const parsedPage = parseNumber(page, 1);
   const parsedPerPage = parseNumber(perPage, 10);
 
