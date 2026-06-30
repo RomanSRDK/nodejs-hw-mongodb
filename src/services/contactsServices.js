@@ -1,7 +1,22 @@
 import { ContactsCollection } from '../models/contactSchema.js';
 
-const getAllContacts = async ({ page, perPage, sortBy, sortOrder }) => {
-  const contactsQuery = ContactsCollection.find();
+const getAllContacts = async ({
+  page,
+  perPage,
+  sortBy,
+  sortOrder,
+  type,
+  isFavourite,
+}) => {
+  const filter = {};
+  if (type) {
+    filter.contactType = type;
+  }
+  if (typeof isFavourite === 'boolean') {
+    filter.isFavourite = isFavourite;
+  }
+
+  const contactsQuery = ContactsCollection.find(filter);
 
   const [totalItems, contacts] = await Promise.all([
     // Если фильтрации нет, достаточно вызвать ContactsCollection.countDocuments()
