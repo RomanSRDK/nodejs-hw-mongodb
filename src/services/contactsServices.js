@@ -1,22 +1,27 @@
 import { ContactsCollection } from '../models/contactSchema.js';
-import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
 const getAllContacts = async ({ page, perPage, sortBy, sortOrder }) => {
-  const skip = (page - 1) * perPage;
-  const limit = perPage;
+  const contactsQuery = ContactsCollection.find();
 
-  const totalContacts = await ContactsCollection.countDocuments();
+  const [totalItems, contacts] = await Promise.all([
+    // Если фильтрации нет, достаточно вызвать ContactsCollection.countDocuments()
+    contactsQuery.clone().countDocuments(),
+    contactsQuery
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .sort({ [sortBy]: sortOrder }),
+  ]);
 
-  const contacts = await ContactsCollection.find()
-    .skip(skip)
-    .limit(limit)
-    .sort({ [sortBy]: sortOrder });
-
-  const paginationData = calculatePaginationData(totalContacts, page, perPage);
+  const totalPages = Math.ceil(totalItems / perPage);
 
   return {
     data: contacts,
-    ...paginationData,
+    page,
+    perPage,
+    totalItems,
+    totalPages,
+    hasPreviousPage: page > 1,
+    hasNextPage: page < totalPages,
   };
 };
 
