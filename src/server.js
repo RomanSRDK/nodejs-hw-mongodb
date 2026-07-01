@@ -3,15 +3,16 @@ import helmet from 'helmet';
 import cors from 'cors';
 // import pino from 'pino-http';
 import { getEnvVar } from './utils/getEnvVar.js';
-import { router as contactsRouter } from './routes/contactsRoutes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { router } from './routes/index.js';
 
 export const setupServer = () => {
   // const PORT = process.env.PORT ?? 3000;
   const PORT = Number(getEnvVar('PORT', '3000'));
   const app = express();
 
+  // use() — это "подключить".
   app.use(helmet());
   app.use(cors());
   app.use(express.json());
@@ -22,7 +23,7 @@ export const setupServer = () => {
   //     },
   //   }),
   // );
-  app.use(contactsRouter);
+  app.use(router);
   app.use(notFoundHandler);
   app.use(errorHandler);
 

@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { contactTypeList } from '../constants/contactConstants.js';
 
 const createContactSchema = Joi.object({
-  name: Joi.string().min(3).max(20).min(3).max(20).required(),
+  name: Joi.string().min(3).max(20).required(),
   phoneNumber: Joi.string().min(3).max(20).required(),
   email: Joi.string().email({
     minDomainSegments: 2,
