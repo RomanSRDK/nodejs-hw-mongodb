@@ -6,8 +6,9 @@ import { getEnvVar } from './utils/getEnvVar.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { router } from './routes/index.js';
+import cookieParser from 'cookie-parser';
 
-export const setupServer = () => {
+export const startServer = () => {
   // const PORT = process.env.PORT ?? 3000;
   const PORT = Number(getEnvVar('PORT', '3000'));
   const app = express();
@@ -15,6 +16,7 @@ export const setupServer = () => {
   // use() — это "подключить".
   app.use(helmet());
   app.use(cors());
+  app.use(cookieParser());
   app.use(express.json());
   // app.use(
   //   pino({
