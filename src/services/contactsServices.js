@@ -1,4 +1,4 @@
-import { ContactsCollection } from '../models/contactSchema.js';
+import { ContactsCollection } from '../models/contactsSchema.js';
 
 const getAllContacts = async ({
   page,

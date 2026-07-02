@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose';
 import { contactTypeList } from '../constants/contactConstants.js';
 
-const contactSchema = new Schema(
+const contactsSchema = new Schema(
   {
     name: {
       type: String,
@@ -30,4 +30,4 @@ const contactSchema = new Schema(
   },
 );
 
-export const ContactsCollection = model('contacts', contactSchema);
+export const ContactsCollection = model('contacts', contactsSchema);

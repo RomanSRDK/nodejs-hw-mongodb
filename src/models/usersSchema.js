@@ -8,8 +8,9 @@ const usersSchema = new Schema(
     },
     email: {
       type: String,
-      required: true,
       unique: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      required: true,
     },
     password: {
       type: String,

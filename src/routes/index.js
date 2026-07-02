@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import contactsRouter from './contactsRoutes.js';
-import authRouter from './authRoutes.js';
+import { contactsRouter } from './contactsRoutes.js';
+import { authRouter } from './authRoutes.js';
 
 export const router = Router();
 

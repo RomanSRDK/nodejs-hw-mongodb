@@ -1,5 +1,10 @@
-import { ONE_DAY } from '../constants/contactConstants.js';
-import { loginUser, registerUser } from '../services/authServices.js';
+import { THIRTY_DAYS } from '../constants/authConstants.js';
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshUsersSession,
+} from '../services/authServices.js';
 
 const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
@@ -13,14 +18,14 @@ const registerUserController = async (req, res) => {
 
 const loginUserController = async (req, res) => {
   const session = await loginUser(req.body);
-  res.cookie('refreshToken', session.refreshToken, {
+
+  const cookieOptions = {
     httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
-  });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
-  });
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  };
+
+  res.cookie('refreshToken', session.refreshToken, cookieOptions);
+  res.cookie('sessionId', session._id, cookieOptions);
 
   res.json({
     status: 200,
@@ -31,4 +36,48 @@ const loginUserController = async (req, res) => {
   });
 };
 
-export { registerUserController, loginUserController };
+const logoutUserController = async (req, res) => {
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId);
+  }
+
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  res.status(204).send();
+};
+
+const setupSession = (res, session) => {
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  });
+};
+
+const refreshUserSessionController = async (req, res) => {
+  const session = await refreshUsersSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
+
+  setupSession(res, session);
+
+  res.json({
+    status: 200,
+    message: 'Successfully refreshed a session!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};
+
+export {
+  registerUserController,
+  loginUserController,
+  logoutUserController,
+  refreshUserSessionController,
+};

@@ -38,6 +38,7 @@ const getContactByIdController = async (req, res) => {
 
   if (!contact) {
     const error = createHttpError(404, 'Contact not found');
+
     throw error;
   }
 

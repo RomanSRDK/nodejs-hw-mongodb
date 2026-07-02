@@ -5,14 +5,19 @@ const registerUserSchema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ['com', 'net'] },
+      tlds: { allow: false },
     })
     .required(),
   password: Joi.string().required(),
 });
 
 const loginUserSchema = Joi.object({
-  email: Joi.string().email().required(),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: false },
+    })
+    .required(),
   password: Joi.string().required(),
 });
 
