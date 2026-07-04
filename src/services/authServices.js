@@ -18,7 +18,6 @@ const registerUser = async (payload) => {
 
 const loginUser = async ({ email, password }) => {
   const user = await UsersCollection.findOne({ email });
-
   if (!user) {
     throw createHttpError(401, 'Email or password is incorrect');
   }
@@ -41,10 +40,6 @@ const loginUser = async ({ email, password }) => {
     accessTokenValidUntil: new Date(now + FIFTEEN_MINUTES),
     refreshTokenValidUntil: new Date(now + THIRTY_DAYS),
   });
-};
-
-const logoutUser = async (sessionId) => {
-  await SessionsCollection.deleteOne({ _id: sessionId });
 };
 
 const createSession = () => {
@@ -84,6 +79,10 @@ const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     userId: session.userId,
     ...newSession,
   });
+};
+
+const logoutUser = async (sessionId) => {
+  await SessionsCollection.deleteOne({ _id: sessionId });
 };
 
 export { registerUser, loginUser, logoutUser, refreshUsersSession };
