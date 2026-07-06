@@ -77,6 +77,7 @@ const deleteContactController = async (req, res) => {
 
 const patchContactController = async (req, res) => {
   const { contactId } = req.params;
+  // const photo = req.file;
   const result = await updateContact(contactId, req.user._id, req.body);
 
   if (!result) {

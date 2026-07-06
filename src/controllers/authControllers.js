@@ -1,9 +1,11 @@
-import { THIRTY_DAYS } from '../constants/authConstants.js';
+import { THIRTY_DAYS } from '../constants/constants.js';
 import {
   registerUser,
   loginUser,
   logoutUser,
   refreshUsersSession,
+  requestResetToken,
+  resetPassword,
 } from '../services/authServices.js';
 
 //
@@ -70,9 +72,30 @@ const logoutUserController = async (req, res) => {
   res.status(204).send();
 };
 
+const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+
+  res.json({
+    status: 200,
+    message: 'Reset password email was successfully sent!',
+    data: {},
+  });
+};
+
+const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset!',
+    status: 200,
+    data: {},
+  });
+};
+
 export {
   registerUserController,
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
+  requestResetEmailController,
+  resetPasswordController,
 };
