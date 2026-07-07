@@ -6,18 +6,24 @@ import { SessionsCollection } from '../models/sessionsSchema.js';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/authConstants.js';
 
 const registerUser = async (payload) => {
-  if (await UsersCollection.findOne({ email: payload.email })) {
+  const { name, email, password } = payload;
+
+  if (await UsersCollection.findOne({ email })) {
     throw createHttpError(409, 'Email in use');
   }
 
   return await UsersCollection.create({
-    ...payload,
-    password: await bcrypt.hash(payload.password, 10),
+    name,
+    email,
+    password: await bcrypt.hash(password, 10),
   });
 };
 
-const loginUser = async ({ email, password }) => {
+const loginUser = async (payload) => {
+  const { email, password } = payload;
+
   const user = await UsersCollection.findOne({ email });
+
   if (!user) {
     throw createHttpError(401, 'Email or password is incorrect');
   }
@@ -29,29 +35,10 @@ const loginUser = async ({ email, password }) => {
 
   await SessionsCollection.deleteOne({ userId: user._id });
 
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-  const now = Date.now();
-
   return await SessionsCollection.create({
     userId: user._id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(now + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(now + THIRTY_DAYS),
+    ...createSession(),
   });
-};
-
-const createSession = () => {
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-
-  return {
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
-  };
 };
 
 const refreshUsersSession = async ({ sessionId, refreshToken }) => {
@@ -71,18 +58,31 @@ const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     throw createHttpError(401, 'Session token expired');
   }
 
-  const newSession = createSession();
-
   await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
 
   return await SessionsCollection.create({
     userId: session.userId,
-    ...newSession,
+    ...createSession(),
   });
 };
 
-const logoutUser = async (sessionId) => {
-  await SessionsCollection.deleteOne({ _id: sessionId });
+const logoutUser = async ({ sessionId, refreshToken }) => {
+  await SessionsCollection.deleteOne({
+    _id: sessionId,
+    refreshToken,
+  });
 };
+
+const generateToken = () => randomBytes(30).toString('base64');
+function createSession() {
+  const now = Date.now();
+
+  return {
+    accessToken: generateToken(),
+    refreshToken: generateToken(),
+    accessTokenValidUntil: new Date(now + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(now + THIRTY_DAYS),
+  };
+}
 
 export { registerUser, loginUser, logoutUser, refreshUsersSession };

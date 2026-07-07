@@ -6,18 +6,6 @@ import {
   refreshUsersSession,
 } from '../services/authServices.js';
 
-//
-const setupSession = (res, session) => {
-  const cookieOptions = {
-    httpOnly: true,
-    expires: new Date(Date.now() + THIRTY_DAYS),
-  };
-
-  res.cookie('sessionId', session._id, cookieOptions);
-  res.cookie('refreshToken', session.refreshToken, cookieOptions);
-};
-//
-
 const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
 
@@ -61,7 +49,10 @@ const refreshUserSessionController = async (req, res) => {
 
 const logoutUserController = async (req, res) => {
   if (req.cookies.sessionId) {
-    await logoutUser(req.cookies.sessionId);
+    await logoutUser({
+      sessionId: req.cookies.sessionId,
+      refreshToken: req.cookies.refreshToken,
+    });
   }
 
   res.clearCookie('sessionId');
@@ -69,6 +60,18 @@ const logoutUserController = async (req, res) => {
 
   res.status(204).send();
 };
+
+function setupSession(res, session) {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  };
+
+  res.cookie('sessionId', session._id, cookieOptions);
+  res.cookie('refreshToken', session.refreshToken, cookieOptions);
+}
 
 export {
   registerUserController,
