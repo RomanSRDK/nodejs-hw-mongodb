@@ -104,25 +104,33 @@ const requestResetToken = async (email) => {
 
   const resetToken = jwt.sign(
     {
+      // информация, которую мы хотим положить внутрь токена
       sub: user._id,
       email,
     },
+    // Второй аргумент - секретный ключ
     getEnvVar('JWT_SECRET'),
     {
-      expiresIn: '15m',
+      // срок жизни токена
+      expiresIn: '5m',
     },
   );
 
+  // Находим HTML-шаблон письма
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
     'reset-password-email.html',
   );
 
+  // Читаем этот файл
   const templateSource = (
     await fs.readFile(resetPasswordTemplatePath)
   ).toString();
 
+  // Компилируем шаблон
   const template = handlebars.compile(templateSource);
+
+  // Подставляем реальные значения
   const html = template({
     name: user.name,
     link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
@@ -141,14 +149,13 @@ const resetPassword = async (payload) => {
 
   try {
     entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
-  } catch (err) {
-    if (err instanceof Error) throw createHttpError(401, err.message);
-    throw err;
+  } catch {
+    throw createHttpError(401, 'Token is expired or invalid.');
   }
 
   const user = await UsersCollection.findOne({
-    email: entries.email,
     _id: entries.sub,
+    email: entries.email,
   });
 
   if (!user) {
@@ -161,6 +168,8 @@ const resetPassword = async (payload) => {
     { _id: user._id },
     { password: encryptedPassword },
   );
+
+  await SessionsCollection.deleteMany({ _id: user._id });
 };
 
 export {
