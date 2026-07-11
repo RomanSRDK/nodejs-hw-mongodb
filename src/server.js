@@ -7,9 +7,9 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { router } from './routes/index.js';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/constants.js';
 
 export const startServer = () => {
-  // const PORT = process.env.PORT ?? 3000;
   const PORT = Number(getEnvVar('PORT', '3000'));
   const app = express();
 
@@ -25,9 +25,10 @@ export const startServer = () => {
   //     },
   //   }),
   // );
+  app.use(express.static(UPLOAD_DIR));
   app.use(router);
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+  app.use(notFoundHandler); //если ничего не найдено
+  app.use(errorHandler); //если где-то произошла ошибка
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

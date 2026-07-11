@@ -16,14 +16,15 @@ import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-const registerUser = async (payload) => {
-  if (await UsersCollection.findOne({ email: payload.email })) {
+const registerUser = async ({ name, email, password }) => {
+  if (await UsersCollection.findOne({ email })) {
     throw createHttpError(409, 'Email in use');
   }
 
   return await UsersCollection.create({
-    ...payload,
-    password: await bcrypt.hash(payload.password, 10),
+    name,
+    email,
+    password: await bcrypt.hash(password, 10),
   });
 };
 
@@ -40,29 +41,10 @@ const loginUser = async ({ email, password }) => {
 
   await SessionsCollection.deleteOne({ userId: user._id });
 
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-  const now = Date.now();
-
   return await SessionsCollection.create({
     userId: user._id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(now + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(now + THIRTY_DAYS),
+    ...createSession(),
   });
-};
-
-const createSession = () => {
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
-
-  return {
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + THIRTY_DAYS),
-  };
 };
 
 const refreshUsersSession = async ({ sessionId, refreshToken }) => {
@@ -169,8 +151,20 @@ const resetPassword = async (payload) => {
     { password: encryptedPassword },
   );
 
-  await SessionsCollection.deleteMany({ _id: user._id });
+  await SessionsCollection.deleteMany({ userId: user._id });
 };
+
+const generateToken = () => randomBytes(30).toString('base64');
+function createSession() {
+  const now = Date.now();
+
+  return {
+    accessToken: generateToken(),
+    refreshToken: generateToken(),
+    accessTokenValidUntil: new Date(now + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(now + THIRTY_DAYS),
+  };
+}
 
 export {
   registerUser,

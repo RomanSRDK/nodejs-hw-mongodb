@@ -3,7 +3,6 @@ import { SessionsCollection } from '../models/sessionsSchema.js';
 import { UsersCollection } from '../models/usersSchema.js';
 
 export const authenticate = async (req, res, next) => {
-  // const authHeader = req.headers.authorization;
   const authHeader = req.get('Authorization');
 
   if (!authHeader) {
